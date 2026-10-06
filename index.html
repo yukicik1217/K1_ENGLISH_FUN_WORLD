@@ -1,0 +1,1120 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>English Fun World for K1</title>
+
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+
+  <!-- Google Fonts: Fredoka & Quicksand for playful typography -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@500;600;700&family=Quicksand:wght@600;700&display=swap" rel="stylesheet">
+
+  <style>
+    * {
+      font-family: 'Fredoka', 'Quicksand', sans-serif;
+      user-select: none;
+      -webkit-user-select: none;
+      touch-action: manipulation;
+    }
+
+    body {
+      background: linear-gradient(135deg, #a1c4fd 0%, #c2e9fb 50%, #e0c3fc 100%);
+      min-height: 100vh;
+      overflow-x: hidden;
+    }
+
+    /* Floating Clouds Background Animation */
+    .cloud {
+      position: absolute;
+      background: rgba(255, 255, 255, 0.85);
+      border-radius: 50px;
+      animation: floatCloud 24s linear infinite;
+      z-index: 0;
+      pointer-events: none;
+      box-shadow: 0 8px 15px rgba(0,0,0,0.05);
+    }
+    .cloud::before, .cloud::after {
+      content: '';
+      position: absolute;
+      background: rgba(255, 255, 255, 0.85);
+      border-radius: 50%;
+    }
+    .cloud::before { width: 50px; height: 50px; top: -20px; left: 15px; }
+    .cloud::after { width: 40px; height: 40px; top: -15px; right: 15px; }
+
+    @keyframes floatCloud {
+      0% { transform: translateX(-200px); }
+      100% { transform: translateX(100vw); }
+    }
+
+    /* Stage 1: Balloons with strictly WHITE text */
+    .balloon {
+      position: absolute;
+      bottom: -140px;
+      width: 95px;
+      height: 115px;
+      border-radius: 50% 50% 50% 50% / 40% 40% 60% 60%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 3.2rem;
+      font-weight: 800;
+      /* MANDATORY REQUIREMENT: White letter text inside balloon */
+      color: #FFFFFF !important;
+      text-shadow: 2px 2px 0px rgba(0,0,0,0.4), -1px -1px 0px rgba(0,0,0,0.4);
+      cursor: pointer;
+      box-shadow: inset -12px -12px 25px rgba(0,0,0,0.2), 0 10px 20px rgba(0,0,0,0.15);
+      z-index: 10;
+    }
+    .balloon::after {
+      content: "▲";
+      position: absolute;
+      bottom: -13px;
+      color: inherit;
+      font-size: 14px;
+    }
+    .balloon-string {
+      position: absolute;
+      bottom: -35px;
+      width: 2px;
+      height: 28px;
+      background-color: rgba(120, 120, 120, 0.5);
+    }
+
+    /* Pop Particle Effect */
+    .particle {
+      position: absolute;
+      pointer-events: none;
+      animation: popParticle 0.5s ease-out forwards;
+      border-radius: 50%;
+      z-index: 25;
+    }
+    @keyframes popParticle {
+      0% { transform: translate(0, 0) scale(1); opacity: 1; }
+      100% { transform: translate(var(--dx), var(--dy)) scale(0); opacity: 0; }
+    }
+
+    /* Floating Score (+1) Text */
+    .floating-score {
+      position: absolute;
+      font-size: 2rem;
+      font-weight: 800;
+      color: #10B981;
+      text-shadow: 0 2px 4px rgba(0,0,0,0.2);
+      pointer-events: none;
+      animation: floatUpScore 0.8s ease-out forwards;
+      z-index: 30;
+    }
+    @keyframes floatUpScore {
+      0% { transform: translateY(0) scale(1); opacity: 1; }
+      100% { transform: translateY(-50px) scale(1.4); opacity: 0; }
+    }
+
+    .monster-idle {
+      animation: monsterFloat 3s ease-in-out infinite alternate;
+    }
+    @keyframes monsterFloat {
+      0% { transform: translateY(0px) rotate(0deg); }
+      100% { transform: translateY(-12px) rotate(3deg); }
+    }
+
+    .monster-eating {
+      animation: monsterMunch 0.5s ease-in-out infinite alternate;
+    }
+    @keyframes monsterMunch {
+      0% { transform: scale(1) rotate(-5deg); }
+      50% { transform: scale(1.25) rotate(5deg); }
+      100% { transform: scale(1.05) rotate(-3deg); }
+    }
+
+    /* Tactile button bounce */
+    .bounce-btn {
+      transition: transform 0.12s ease, box-shadow 0.12s ease, filter 0.12s ease;
+    }
+    .bounce-btn:active {
+      transform: scale(0.92);
+    }
+
+    /* Confetti Overlay Canvas */
+    #confetti-canvas {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100vw;
+      height: 100vh;
+      pointer-events: none;
+      z-index: 60;
+    }
+
+    /* Shake animation for wrong choices */
+    .shake-anim {
+      animation: shake 0.4s ease-in-out;
+    }
+    @keyframes shake {
+      0%, 100% { transform: translateX(0); }
+      20%, 60% { transform: translateX(-8px); }
+      40%, 80% { transform: translateX(8px); }
+    }
+  </style>
+</head>
+<body class="h-screen w-screen flex flex-col justify-between select-none relative overflow-hidden">
+
+  <div class="cloud w-36 h-11 top-10 left-0" style="animation-delay: 0s;"></div>
+  <div class="cloud w-52 h-14 top-28 left-0" style="animation-delay: -8s;"></div>
+  <div class="cloud w-44 h-11 top-6 left-0" style="animation-delay: -16s;"></div>
+
+  <!-- Confetti Canvas -->
+  <canvas id="confetti-canvas"></canvas>
+
+  <header class="w-full p-4 flex justify-between items-center z-30">
+    <!-- Return to Menu Button -->
+    <button id="btn-home" onclick="showMainMenu()" class="hidden bounce-btn bg-white/95 hover:bg-white text-amber-500 font-bold px-4 py-2.5 rounded-2xl shadow-lg border-2 border-amber-300 flex items-center space-x-2 text-lg">
+      <span class="text-xl">🏠</span>
+      <span>Menu</span>
+    </button>
+
+    <!-- Header Title -->
+    <div id="header-title" class="text-2xl md:text-3xl font-extrabold text-indigo-700 drop-shadow-sm flex-1 text-center">
+      English Fun World! 🎈
+    </div>
+
+    <!-- Audio BGM & Sound Toggle Button -->
+    <button id="btn-audio-toggle" onclick="toggleAudio()" class="bounce-btn bg-white/95 hover:bg-white text-purple-600 font-bold px-4 py-2.5 rounded-2xl shadow-lg border-2 border-purple-300 text-xl flex items-center space-x-1">
+      <span id="audio-icon">🔊</span>
+    </button>
+  </header>
+
+  <main class="flex-1 relative flex flex-col items-center justify-center p-3 z-10 w-full max-w-4xl mx-auto">
+
+    <!-- ================= MAIN MENU SCREEN ================= -->
+    <section id="screen-main-menu" class="w-full flex flex-col items-center justify-center space-y-6 my-auto">
+      <div class="text-center space-y-2 bg-white/80 p-6 rounded-3xl backdrop-blur-md border-4 border-white/90 shadow-xl w-full max-w-lg">
+        <h1 class="text-3xl md:text-4xl font-extrabold text-indigo-600 tracking-wide">
+          English Fun World! 🎈
+        </h1>
+        <p class="text-sky-600 font-bold text-lg">Select a game to play!</p>
+      </div>
+
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-5 w-full max-w-3xl px-3">
+        <!-- Stage 1 Button -->
+        <button onclick="startStage1()" class="bounce-btn bg-gradient-to-b from-pink-400 to-rose-500 text-white p-6 rounded-3xl shadow-xl border-4 border-white flex flex-col items-center justify-center space-y-3 hover:brightness-105">
+          <span class="text-6xl animate-bounce">🎈</span>
+          <span class="text-2xl font-bold">Balloon Pop</span>
+          <span class="bg-white/25 text-xs px-3 py-1 rounded-full font-semibold">Letters A, B, C</span>
+        </button>
+
+        <!-- Stage 2 Button -->
+        <button onclick="startStage2()" class="bounce-btn bg-gradient-to-b from-amber-400 to-orange-500 text-white p-6 rounded-3xl shadow-xl border-4 border-white flex flex-col items-center justify-center space-y-3 hover:brightness-105">
+          <span class="text-6xl animate-bounce">👋</span>
+          <span class="text-2xl font-bold">What Should I Say?</span>
+          <span class="bg-white/25 text-xs px-3 py-1 rounded-full font-semibold">Greetings</span>
+        </button>
+
+        <!-- Stage 3 Button -->
+        <button onclick="startStage3()" class="bounce-btn bg-gradient-to-b from-emerald-400 to-teal-600 text-white p-6 rounded-3xl shadow-xl border-4 border-white flex flex-col items-center justify-center space-y-3 hover:brightness-105">
+          <span class="text-6xl animate-bounce">👾</span>
+          <span class="text-2xl font-bold">Hungry Monster</span>
+          <span class="bg-white/25 text-xs px-3 py-1 rounded-full font-semibold">I eat / I drink</span>
+        </button>
+      </div>
+    </section>
+
+    <!-- ================= STAGE 1: BALLOON POP ================= -->
+    <section id="screen-stage1" class="hidden w-full h-full flex flex-col items-center justify-between relative">
+      <!-- Top Stage Status Bar (Timer & Target) -->
+      <div class="w-full flex justify-between items-center z-20 px-2 space-x-2">
+        <!-- Score Counter -->
+        <div class="bg-white/90 border-3 border-pink-300 rounded-2xl px-4 py-2 shadow-md text-pink-600 font-extrabold text-lg flex items-center space-x-1">
+          <span>Score:</span>
+          <span id="s1-score" class="text-2xl text-purple-700">0</span>
+        </div>
+
+        <!-- Target Letter Display -->
+        <div class="bg-white/95 border-4 border-pink-400 rounded-2xl px-5 py-2 shadow-lg text-center backdrop-blur-md flex items-center space-x-3">
+          <span class="text-lg md:text-xl font-bold text-pink-600">Target:</span>
+          <span id="s1-target-display" class="text-3xl md:text-4xl font-black text-purple-600 animate-pulse">A / a</span>
+          <button onclick="repeatStage1Prompt()" class="bounce-btn bg-pink-100 hover:bg-pink-200 text-pink-600 p-2 rounded-full text-lg shadow">🔊</button>
+        </div>
+
+        <!-- 30-Second Countdown Timer -->
+        <div class="bg-white/90 border-3 border-amber-300 rounded-2xl px-4 py-2 shadow-md text-amber-600 font-extrabold text-lg flex items-center space-x-1">
+          <span>⏱️</span>
+          <span id="s1-timer" class="text-2xl text-amber-700">30s</span>
+        </div>
+      </div>
+
+      <!-- Floating Balloon Playground Area -->
+      <div id="balloon-container" class="absolute inset-0 w-full h-full overflow-hidden pointer-events-auto">
+        <!-- Dynamic balloons spawned in JavaScript -->
+      </div>
+    </section>
+
+    <!-- ================= STAGE 2: WHAT SHOULD I SAY? ================= -->
+    <section id="screen-stage2" class="hidden w-full flex flex-col items-center justify-center space-y-6 my-auto">
+      <!-- Scenario Box -->
+      <div class="bg-white/90 border-4 border-amber-300 rounded-3xl p-6 text-center shadow-xl backdrop-blur-md w-full max-w-lg space-y-3">
+        <div id="s2-scenario-emoji" class="text-7xl md:text-8xl">🌅</div>
+        <h2 id="s2-scenario-text" class="text-2xl font-bold text-amber-900">The sun is rising! What should you say?</h2>
+      </div>
+
+      <!-- Exactly 2 Big Choice Buttons -->
+      <div id="s2-choices-container" class="grid grid-cols-1 md:grid-cols-2 gap-4 w-full max-w-lg">
+        <!-- Dynamic choices rendered in JS -->
+      </div>
+
+      <!-- Round Progress Indicator -->
+      <div class="bg-white/85 px-5 py-1.5 rounded-full border-2 border-amber-200 text-amber-800 font-bold text-base shadow">
+        Round <span id="s2-round-count">1</span> / 5
+      </div>
+    </section>
+
+    <!-- ================= STAGE 3: HUNGRY MONSTER ================= -->
+    <section id="screen-stage3" class="hidden w-full flex flex-col items-center justify-center space-y-4 my-auto">
+      <!-- Clean Sentence Banner (NO BRACKETS!) -->
+      <div class="bg-white/95 border-4 border-teal-300 rounded-3xl px-6 py-4 shadow-xl text-center backdrop-blur-md w-full max-w-md">
+        <div id="s3-sentence" class="text-2xl md:text-3xl font-extrabold text-teal-900 tracking-wide">
+          I eat an apple.
+        </div>
+      </div>
+
+      <!-- Monster Visual Container -->
+      <div id="monster-container" class="relative flex flex-col items-center justify-center my-2">
+        <div id="monster-avatar" class="monster-idle text-8xl md:text-9xl transition-transform duration-300 drop-shadow-md">
+          👾
+        </div>
+        <!-- Speech Bubble Reaction -->
+        <div id="monster-bubble" class="absolute -top-6 bg-white border-3 border-teal-400 rounded-2xl px-4 py-1.5 text-base font-bold text-teal-800 shadow-md hidden">
+          Yum yum! 😋
+        </div>
+      </div>
+
+      <!-- EXACTLY 2 Picture Choices -->
+      <div id="s3-choices-container" class="grid grid-cols-2 gap-4 w-full max-w-md">
+        <!-- Dynamic choice buttons in JS -->
+      </div>
+
+      <!-- Round Counter -->
+      <div class="bg-white/85 px-5 py-1.5 rounded-full border-2 border-teal-200 text-teal-800 font-bold text-base shadow">
+        Round <span id="s3-round-count">1</span> / 5
+      </div>
+    </section>
+
+    <!-- ================= GAME OVER / SCORE SUMMARY SCREEN ================= -->
+    <section id="screen-score" class="hidden w-full flex flex-col items-center justify-center space-y-6 my-auto">
+      <div class="bg-white/95 border-4 border-yellow-300 rounded-3xl p-8 shadow-2xl text-center backdrop-blur-md w-full max-w-md space-y-5">
+        <div class="text-7xl animate-bounce">🏆</div>
+        <h2 class="text-3xl md:text-4xl font-extrabold text-amber-600">Great Job!</h2>
+        
+        <!-- Star Rating -->
+        <div id="stars-container" class="text-5xl space-x-2">
+          ⭐ ⭐ ⭐
+        </div>
+
+        <!-- Numeric Score Box -->
+        <div class="bg-amber-50 rounded-2xl p-4 border-2 border-amber-300">
+          <p class="text-amber-800 font-bold text-lg">Total Score</p>
+          <div class="text-5xl font-black text-amber-600" id="final-score-text">10 Points</div>
+        </div>
+
+        <!-- Navigation Buttons -->
+        <div class="flex space-x-4 pt-2">
+          <button onclick="replayCurrentStage()" class="flex-1 bounce-btn bg-emerald-500 hover:bg-emerald-600 text-white font-bold py-3.5 px-4 rounded-2xl shadow-lg text-xl border-2 border-emerald-300 flex items-center justify-center space-x-2">
+            <span>Play Again</span> <span>🔄</span>
+          </button>
+          <button onclick="showMainMenu()" class="flex-1 bounce-btn bg-sky-500 hover:bg-sky-600 text-white font-bold py-3.5 px-4 rounded-2xl shadow-lg text-xl border-2 border-sky-300 flex items-center justify-center space-x-2">
+            <span>Menu</span> <span>🏠</span>
+          </button>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- Footer Banner -->
+  <footer class="p-2 text-center text-xs md:text-sm text-indigo-900/60 font-bold z-20">
+    K1 English World • Interactive Learning
+  </footer>
+
+  <!-- ================= JAVASCRIPT GAME ENGINE ================= -->
+  <script>
+    let audioCtx = null;
+    let bgmGain = null;
+    let isMuted = false;
+    let bgmInterval = null;
+
+    // Game state parameters
+    let currentStage = 0; // 1, 2, or 3
+    let stageScore = 0;
+    let currentRound = 1;
+    let totalRounds = 5;
+
+    // Web Audio API Context setup
+    function initAudioContext() {
+      if (!audioCtx) {
+        const AudioContext = window.AudioContext || window.webkitAudioContext;
+        audioCtx = new AudioContext();
+        startBGM();
+      }
+      if (audioCtx.state === 'suspended') {
+        audioCtx.resume();
+      }
+    }
+
+    // Toggle Audio Mute State
+    function toggleAudio() {
+      isMuted = !isMuted;
+      document.getElementById('audio-icon').innerText = isMuted ? '🔇' : '🔊';
+      if (bgmGain) {
+        bgmGain.gain.value = isMuted ? 0 : 0.035;
+      }
+      if (isMuted && 'speechSynthesis' in window) {
+        window.speechSynthesis.cancel();
+      }
+    }
+
+    // Synthesized marimba/bell BGM sequence
+    function startBGM() {
+      if (bgmInterval || !audioCtx) return;
+
+      bgmGain = audioCtx.createGain();
+      bgmGain.gain.value = isMuted ? 0 : 0.035;
+      bgmGain.connect(audioCtx.destination);
+
+      // Gentle melodic notes: C4, E4, G4, B4, C5, G4, E4, C4
+      const notes = [261.63, 329.63, 392.00, 493.88, 523.25, 392.00, 329.63, 261.63];
+      let noteIdx = 0;
+
+      bgmInterval = setInterval(() => {
+        if (isMuted || !audioCtx) return;
+        try {
+          const osc = audioCtx.createOscillator();
+          const noteGain = audioCtx.createGain();
+          osc.type = 'sine';
+          osc.frequency.setValueAtTime(notes[noteIdx], audioCtx.currentTime);
+          
+          noteGain.gain.setValueAtTime(0.01, audioCtx.currentTime);
+          noteGain.gain.exponentialRampToValueAtTime(0.035, audioCtx.currentTime + 0.1);
+          noteGain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.5);
+
+          osc.connect(noteGain);
+          noteGain.connect(bgmGain);
+
+          osc.start();
+          osc.stop(audioCtx.currentTime + 0.55);
+
+          noteIdx = (noteIdx + 1) % notes.length;
+        } catch (e) {
+          console.error(e);
+        }
+      }, 600);
+    }
+
+    /* Balloon Pop SFX */
+    function playPopSFX() {
+      if (isMuted || !audioCtx) return;
+      const osc = audioCtx.createOscillator();
+      const gain = audioCtx.createGain();
+      osc.type = 'sine';
+      osc.frequency.setValueAtTime(700, audioCtx.currentTime);
+      osc.frequency.exponentialRampToValueAtTime(120, audioCtx.currentTime + 0.08);
+
+      gain.gain.setValueAtTime(0.3, audioCtx.currentTime);
+      gain.gain.linearRampToValueAtTime(0.01, audioCtx.currentTime + 0.08);
+
+      osc.connect(gain);
+      gain.connect(audioCtx.destination);
+      osc.start();
+      osc.stop(audioCtx.currentTime + 0.08);
+    }
+
+    /* Standard Chime SFX */
+    function playChimeSFX() {
+      if (isMuted || !audioCtx) return;
+      const now = audioCtx.currentTime;
+      const osc1 = audioCtx.createOscillator();
+      const osc2 = audioCtx.createOscillator();
+      const gain = audioCtx.createGain();
+
+      osc1.type = 'triangle';
+      osc2.type = 'triangle';
+
+      osc1.frequency.setValueAtTime(523.25, now); // C5
+      osc1.frequency.setValueAtTime(659.25, now + 0.1); // E5
+      osc2.frequency.setValueAtTime(783.99, now + 0.2); // G5
+
+      gain.gain.setValueAtTime(0.2, now);
+      gain.gain.exponentialRampToValueAtTime(0.001, now + 0.5);
+
+      osc1.connect(gain);
+      osc2.connect(gain);
+      gain.connect(audioCtx.destination);
+
+      osc1.start(now);
+      osc2.start(now + 0.1);
+      osc1.stop(now + 0.5);
+      osc2.stop(now + 0.5);
+    }
+
+    /* Super Cheerful Monster Celebration SFX (Upbeat ascending arpeggio + Munching) */
+    function playSuperCheerfulMonsterSFX() {
+      if (isMuted || !audioCtx) return;
+      const now = audioCtx.currentTime;
+
+      // 1. Upbeat ascending cheerful arpeggio notes (C5, E5, G5, C6, E6)
+      const cheerfulNotes = [523.25, 659.25, 783.99, 1046.50, 1318.51];
+      cheerfulNotes.forEach((freq, idx) => {
+        const osc = audioCtx.createOscillator();
+        const gain = audioCtx.createGain();
+        osc.type = 'triangle';
+        osc.frequency.setValueAtTime(freq, now + idx * 0.08);
+
+        gain.gain.setValueAtTime(0.25, now + idx * 0.08);
+        gain.gain.exponentialRampToValueAtTime(0.001, now + idx * 0.08 + 0.3);
+
+        osc.connect(gain);
+        gain.connect(audioCtx.destination);
+
+        osc.start(now + idx * 0.08);
+        osc.stop(now + idx * 0.08 + 0.3);
+      });
+
+      // 2. Play playful munching sound alongside
+      for (let i = 0; i < 3; i++) {
+        setTimeout(() => {
+          if (!audioCtx) return;
+          const osc = audioCtx.createOscillator();
+          const gain = audioCtx.createGain();
+          osc.type = 'sawtooth';
+          osc.frequency.setValueAtTime(260 - (i * 40), audioCtx.currentTime);
+          osc.frequency.linearRampToValueAtTime(110, audioCtx.currentTime + 0.09);
+
+          gain.gain.setValueAtTime(0.2, audioCtx.currentTime);
+          gain.gain.linearRampToValueAtTime(0.01, audioCtx.currentTime + 0.09);
+
+          osc.connect(gain);
+          gain.connect(audioCtx.destination);
+          osc.start();
+          osc.stop(audioCtx.currentTime + 0.09);
+        }, i * 110);
+      }
+    }
+
+    /* Soft Wrong Buzzer SFX */
+    function playWrongSFX() {
+      if (isMuted || !audioCtx) return;
+      const osc = audioCtx.createOscillator();
+      const gain = audioCtx.createGain();
+      osc.type = 'sawtooth';
+      osc.frequency.setValueAtTime(180, audioCtx.currentTime);
+      osc.frequency.linearRampToValueAtTime(130, audioCtx.currentTime + 0.18);
+
+      gain.gain.setValueAtTime(0.12, audioCtx.currentTime);
+      gain.gain.linearRampToValueAtTime(0.01, audioCtx.currentTime + 0.18);
+
+      osc.connect(gain);
+      gain.connect(audioCtx.destination);
+      osc.start();
+      osc.stop(audioCtx.currentTime + 0.18);
+    }
+
+    /* Stage End Fanfare SFX */
+    function playFanfareSFX() {
+      if (isMuted || !audioCtx) return;
+      const notes = [440, 554.37, 659.25, 880];
+      notes.forEach((freq, i) => {
+        setTimeout(() => {
+          if (!audioCtx) return;
+          const osc = audioCtx.createOscillator();
+          const gain = audioCtx.createGain();
+          osc.type = 'triangle';
+          osc.frequency.setValueAtTime(freq, audioCtx.currentTime);
+
+          gain.gain.setValueAtTime(0.25, audioCtx.currentTime);
+          gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.45);
+
+          osc.connect(gain);
+          gain.connect(audioCtx.destination);
+          osc.start();
+          osc.stop(audioCtx.currentTime + 0.45);
+        }, i * 120);
+      });
+    }
+
+    // Speech Synthesis Helper (Slow rate 0.7 for 3-year-old learners)
+    function speakSlow(text, callback) {
+      if (isMuted || !('speechSynthesis' in window)) {
+        if (callback) setTimeout(callback, 700);
+        return;
+      }
+      window.speechSynthesis.cancel(); // Stop prior speech
+      const utterance = new SpeechSynthesisUtterance(text);
+      utterance.rate = 0.7; // Slow and clear for toddlers
+      utterance.pitch = 1.15; // Cheerful friendly pitch
+      utterance.lang = 'en-US';
+
+      if (callback) {
+        utterance.onend = callback;
+        utterance.onerror = callback;
+      }
+      window.speechSynthesis.speak(utterance);
+    }
+
+    // View Switcher
+    function showScreen(screenId) {
+      const screens = ['screen-main-menu', 'screen-stage1', 'screen-stage2', 'screen-stage3', 'screen-score'];
+      screens.forEach(id => {
+        const el = document.getElementById(id);
+        if (id === screenId) {
+          el.classList.remove('hidden');
+        } else {
+          el.classList.add('hidden');
+        }
+      });
+
+      const homeBtn = document.getElementById('btn-home');
+      if (screenId === 'screen-main-menu') {
+        homeBtn.classList.add('hidden');
+        document.getElementById('header-title').innerText = "English Fun World! 🎈";
+      } else {
+        homeBtn.classList.remove('hidden');
+      }
+    }
+
+    function showMainMenu() {
+      initAudioContext();
+      clearStage1Timers();
+      showScreen('screen-main-menu');
+    }
+
+    function replayCurrentStage() {
+      if (currentStage === 1) startStage1();
+      else if (currentStage === 2) startStage2();
+      else if (currentStage === 3) startStage3();
+      else showMainMenu();
+    }
+
+    /* ================= STAGE 1: BALLOON POP LOGIC ================= */
+    let s1TargetLetter = 'A'; // 'A', 'B', or 'C'
+    let s1TimerInterval = null;
+    let s1SpawnInterval = null;
+    let s1TimeLeft = 30;
+    let s1TargetSwitchTimer = null;
+    let s1Colors = ['#ff7675', '#74b9ff', '#55efc4', '#ffeaa7', '#a29bfe', '#fd79a8'];
+
+    function startStage1() {
+      initAudioContext();
+      currentStage = 1;
+      stageScore = 0;
+      s1TimeLeft = 30;
+
+      showScreen('screen-stage1');
+      document.getElementById('header-title').innerText = "Stage 1: Balloon Pop 🎈";
+      document.getElementById('s1-score').innerText = "0";
+      document.getElementById('s1-timer').innerText = "30s";
+
+      pickNewStage1Target();
+      startStage1Timers();
+    }
+
+    function pickNewStage1Target() {
+      const targets = ['A', 'B', 'C'];
+      // Select new target different from current if possible
+      const filtered = targets.filter(t => t !== s1TargetLetter);
+      s1TargetLetter = filtered[Math.floor(Math.random() * filtered.length)];
+
+      document.getElementById('s1-target-display').innerText = `${s1TargetLetter} / ${s1TargetLetter.toLowerCase()}`;
+      speakSlow(`Pop letter ${s1TargetLetter}!`);
+    }
+
+    function repeatStage1Prompt() {
+      speakSlow(`Pop letter ${s1TargetLetter}!`);
+    }
+
+    function clearStage1Timers() {
+      if (s1TimerInterval) clearInterval(s1TimerInterval);
+      if (s1SpawnInterval) clearInterval(s1SpawnInterval);
+      if (s1TargetSwitchTimer) clearInterval(s1TargetSwitchTimer);
+      s1TimerInterval = null;
+      s1SpawnInterval = null;
+      s1TargetSwitchTimer = null;
+    }
+
+    function startStage1Timers() {
+      clearStage1Timers();
+      document.getElementById('balloon-container').innerHTML = '';
+
+      // 1. 30-Second Countdown Timer
+      s1TimerInterval = setInterval(() => {
+        s1TimeLeft--;
+        document.getElementById('s1-timer').innerText = `${s1TimeLeft}s`;
+        if (s1TimeLeft <= 0) {
+          finishStage();
+        }
+      }, 1000);
+
+      // 2. Periodically switch target letter every 7 seconds to keep game dynamic
+      s1TargetSwitchTimer = setInterval(() => {
+        if (s1TimeLeft > 3) {
+          pickNewStage1Target();
+        }
+      }, 7000);
+
+      // 3. Initial batch of balloons
+      for (let i = 0; i < 4; i++) {
+        setTimeout(spawnSingleBalloon, i * 300);
+      }
+
+      // 4. Continuous Spawner
+      s1SpawnInterval = setInterval(() => {
+        const container = document.getElementById('balloon-container');
+        if (container && container.children.length < 8) {
+          spawnSingleBalloon();
+        }
+      }, 900);
+    }
+
+    function spawnSingleBalloon() {
+      const container = document.getElementById('balloon-container');
+      if (!container || currentStage !== 1) return;
+
+      const balloon = document.createElement('div');
+      balloon.className = 'balloon';
+
+      // Pick randomly between A, a, B, b, C, c
+      const pool = ['A', 'a', 'B', 'b', 'C', 'c'];
+      let chosenLetter = pool[Math.floor(Math.random() * pool.length)];
+
+      // 50% chance to force current target letter (upper or lowercase)
+      if (Math.random() < 0.5) {
+        chosenLetter = Math.random() < 0.5 ? s1TargetLetter : s1TargetLetter.toLowerCase();
+      }
+
+      balloon.innerText = chosenLetter;
+      // White color is enforced in CSS `.balloon` with `color: #FFFFFF !important`
+
+      const bgColor = s1Colors[Math.floor(Math.random() * s1Colors.length)];
+      balloon.style.backgroundColor = bgColor;
+
+      const posX = 8 + Math.random() * 78;
+      balloon.style.left = posX + '%';
+
+      const stringEl = document.createElement('div');
+      stringEl.className = 'balloon-string';
+      balloon.appendChild(stringEl);
+
+      let currentBottom = -140;
+      const speed = 1.4 + Math.random() * 1.4;
+
+      const floatInterval = setInterval(() => {
+        currentBottom += speed;
+        balloon.style.bottom = currentBottom + 'px';
+
+        const sway = Math.sin(currentBottom / 20) * 10;
+        balloon.style.transform = `translateX(${sway}px)`;
+
+        if (currentBottom > window.innerHeight + 120) {
+          clearInterval(floatInterval);
+          if (balloon.parentNode) balloon.parentNode.removeChild(balloon);
+        }
+      }, 20);
+
+      // Balloon Tap / Click Handler
+      balloon.onclick = (e) => {
+        e.stopPropagation();
+        clearInterval(floatInterval);
+
+        const tapX = e.clientX || (posX * window.innerWidth / 100);
+        const tapY = e.clientY || (window.innerHeight - currentBottom);
+
+        // Check if correct: BOTH UPPERCASE & LOWERCASE ARE VALID!
+        const isCorrect = chosenLetter.toUpperCase() === s1TargetLetter.toUpperCase();
+
+        if (isCorrect) {
+          playPopSFX();
+          stageScore++;
+          document.getElementById('s1-score').innerText = stageScore;
+
+          createParticleExplosion(tapX, tapY, bgColor);
+          showFloatingPlusOne(tapX, tapY);
+
+          if (balloon.parentNode) balloon.parentNode.removeChild(balloon);
+
+          // Speak target letter name slowly
+          speakSlow(s1TargetLetter + "!");
+        } else {
+          playPopSFX(); // Soft pop sound
+          createParticleExplosion(tapX, tapY, '#dddddd');
+          if (balloon.parentNode) balloon.parentNode.removeChild(balloon);
+        }
+      };
+
+      container.appendChild(balloon);
+    }
+
+    function showFloatingPlusOne(x, y) {
+      const el = document.createElement('div');
+      el.className = 'floating-score';
+      el.innerText = '+1';
+      el.style.left = x + 'px';
+      el.style.top = y + 'px';
+      document.body.appendChild(el);
+      setTimeout(() => el.remove(), 800);
+    }
+
+    function createParticleExplosion(x, y, color) {
+      for (let i = 0; i < 12; i++) {
+        const p = document.createElement('div');
+        p.className = 'particle';
+        p.style.backgroundColor = color;
+        p.style.width = (10 + Math.random() * 10) + 'px';
+        p.style.height = p.style.width;
+        p.style.left = x + 'px';
+        p.style.top = y + 'px';
+
+        const angle = Math.random() * Math.PI * 2;
+        const dist = 40 + Math.random() * 60;
+        p.style.setProperty('--dx', Math.cos(angle) * dist + 'px');
+        p.style.setProperty('--dy', Math.sin(angle) * dist + 'px');
+
+        document.body.appendChild(p);
+        setTimeout(() => p.remove(), 500);
+      }
+    }
+
+    /* ================= STAGE 2: WHAT SHOULD I SAY? LOGIC ================= */
+    const stage2ScenariosPool = [
+      {
+        emoji: '🌅☀',
+        scenarioText: 'The sun is up! What should you say?',
+        choices: [
+          { text: '☀️ Good morning!', value: 'Good morning', isCorrect: true },
+          { text: '👋 Goodbye!', value: 'Goodbye', isCorrect: false }
+        ]
+      },
+      {
+        emoji: '🎒👋',
+        scenarioText: 'Time to leave school! What should you say?',
+        choices: [
+          { text: '☀️ Good morning!', value: 'Good morning', isCorrect: false },
+          { text: '👋 Goodbye!', value: 'Goodbye', isCorrect: true }
+        ]
+      },
+      {
+        emoji: '🍳☀️',
+        scenarioText: 'It is breakfast time! What should you say?',
+        choices: [
+          { text: '☀️ Good morning!', value: 'Good morning', isCorrect: true },
+          { text: '👋 Goodbye!', value: 'Goodbye', isCorrect: false }
+        ]
+      },
+      {
+        emoji: '🚌👋',
+        scenarioText: 'The bus is leaving! What should you say?',
+        choices: [
+          { text: '☀️ Good morning!', value: 'Good morning', isCorrect: false },
+          { text: '👋 Goodbye!', value: 'Goodbye', isCorrect: true }
+        ]
+      },
+      {
+        emoji: '🏫☀️',
+        scenarioText: 'You see teacher in the morning! What should you say?',
+        choices: [
+          { text: '☀️ Good morning!', value: 'Good morning', isCorrect: true },
+          { text: '👋 Goodbye!', value: 'Goodbye', isCorrect: false }
+        ]
+      }
+    ];
+
+    let currentS2Rounds = [];
+
+    function startStage2() {
+      initAudioContext();
+      currentStage = 2;
+      stageScore = 0;
+      currentRound = 1;
+      totalRounds = 5;
+
+      currentS2Rounds = [...stage2ScenariosPool].sort(() => Math.random() - 0.5);
+
+      showScreen('screen-stage2');
+      document.getElementById('header-title').innerText = "What Should I Say?";
+      setupStage2Round();
+    }
+
+    function setupStage2Round() {
+      const scenario = currentS2Rounds[currentRound - 1];
+      document.getElementById('s2-scenario-emoji').innerText = scenario.emoji;
+      document.getElementById('s2-scenario-text').innerText = scenario.scenarioText;
+      document.getElementById('s2-round-count').innerText = currentRound;
+
+      const container = document.getElementById('s2-choices-container');
+      container.innerHTML = '';
+
+      speakSlow(scenario.scenarioText);
+
+      scenario.choices.forEach(choice => {
+        const card = document.createElement('div');
+        card.className = 'bounce-btn bg-white hover:bg-amber-50 border-4 border-amber-200 rounded-3xl p-5 shadow-lg cursor-pointer flex items-center justify-between transition';
+
+        const textSpan = document.createElement('span');
+        textSpan.className = 'text-2xl font-bold text-amber-900';
+        textSpan.innerText = choice.text;
+
+        const audioBtn = document.createElement('button');
+        audioBtn.className = 'bounce-btn bg-amber-100 hover:bg-amber-200 text-amber-700 p-3 rounded-full text-xl shadow ml-2';
+        audioBtn.innerText = '🔊';
+        audioBtn.onclick = (e) => {
+          e.stopPropagation();
+          speakSlow(choice.value);
+        };
+
+        card.appendChild(textSpan);
+        card.appendChild(audioBtn);
+
+        card.onclick = () => handleStage2Choice(card, choice);
+        container.appendChild(card);
+      });
+    }
+
+    function handleStage2Choice(cardEl, choice) {
+      if (choice.isCorrect) {
+        playChimeSFX();
+        cardEl.classList.add('bg-green-100', 'border-green-400');
+        stageScore++;
+
+        speakSlow(choice.value, () => {
+          currentRound++;
+          if (currentRound > totalRounds) {
+            finishStage();
+          } else {
+            setupStage2Round();
+          }
+        });
+      } else {
+        playWrongSFX();
+        cardEl.classList.add('shake-anim', 'bg-red-100', 'border-red-300');
+        speakSlow(choice.value);
+        setTimeout(() => {
+          cardEl.classList.remove('shake-anim', 'bg-red-100', 'border-red-300');
+        }, 800);
+      }
+    }
+
+    /* ================= STAGE 3: HUNGRY MONSTER LOGIC ================= */
+    // Sentences displayed cleanly WITHOUT brackets in prompts!
+    const stage3RoundsPool = [
+      {
+        displaySentence: 'I eat an apple.',
+        targetWord: 'apple',
+        correctChoice: { name: 'apple', emoji: '🍎' },
+        wrongChoice: { name: 'milk', emoji: '🥛' }
+      },
+      {
+        displaySentence: 'I drink milk.',
+        targetWord: 'milk',
+        correctChoice: { name: 'milk', emoji: '🥛' },
+        wrongChoice: { name: 'pizza', emoji: '🍕' }
+      },
+      {
+        displaySentence: 'I eat a banana.',
+        targetWord: 'banana',
+        correctChoice: { name: 'banana', emoji: '🍌' },
+        wrongChoice: { name: 'water', emoji: '💧' }
+      },
+      {
+        displaySentence: 'I drink juice.',
+        targetWord: 'juice',
+        correctChoice: { name: 'juice', emoji: '🧃' },
+        wrongChoice: { name: 'bread', emoji: '🍞' }
+      },
+      {
+        displaySentence: 'I eat a cookie.',
+        targetWord: 'cookie',
+        correctChoice: { name: 'cookie', emoji: '🍪' },
+        wrongChoice: { name: 'water', emoji: '💧' }
+      }
+    ];
+
+    let currentS3Rounds = [];
+
+    function startStage3() {
+      initAudioContext();
+      currentStage = 3;
+      stageScore = 0;
+      currentRound = 1;
+      totalRounds = 5;
+
+      currentS3Rounds = [...stage3RoundsPool].sort(() => Math.random() - 0.5);
+
+      showScreen('screen-stage3');
+      document.getElementById('header-title').innerText = "Hungry Monster 👾";
+      setupStage3Round();
+    }
+
+    function setupStage3Round() {
+      const roundData = currentS3Rounds[currentRound - 1];
+
+      // NO BRACKETS in prompt sentence display!
+      document.getElementById('s3-sentence').innerText = roundData.displaySentence;
+      document.getElementById('s3-round-count').innerText = currentRound;
+
+      // Reset Monster Visual
+      const monsterAvatar = document.getElementById('monster-avatar');
+      monsterAvatar.className = 'monster-idle text-8xl md:text-9xl transition-transform duration-300 drop-shadow-md';
+      monsterAvatar.innerText = '👾';
+      document.getElementById('monster-bubble').classList.add('hidden');
+
+      speakSlow(roundData.displaySentence);
+
+      // Exactly 2 choices shuffled
+      const choices = [roundData.correctChoice, roundData.wrongChoice].sort(() => Math.random() - 0.5);
+
+      const container = document.getElementById('s3-choices-container');
+      container.innerHTML = '';
+
+      choices.forEach(opt => {
+        const btn = document.createElement('button');
+        btn.className = 'bounce-btn bg-white hover:bg-teal-50 border-4 border-teal-200 rounded-3xl p-5 shadow-lg flex flex-col items-center justify-center space-y-2';
+
+        btn.innerHTML = `
+          <span class="text-6xl">${opt.emoji}</span>
+          <span class="text-xl font-bold text-teal-800 capitalize">${opt.name}</span>
+        `;
+
+        btn.onclick = () => handleStage3Choice(btn, opt, roundData);
+        container.appendChild(btn);
+      });
+    }
+
+    function handleStage3Choice(btnEl, selectedChoice, roundData) {
+      if (selectedChoice.name === roundData.correctChoice.name) {
+        // Correct selection! Play extra cheerful monster celebration sound!
+        playSuperCheerfulMonsterSFX();
+        stageScore++;
+
+        // Monster Animation
+        const monsterAvatar = document.getElementById('monster-avatar');
+        monsterAvatar.innerText = '😮';
+        monsterAvatar.className = 'monster-eating text-8xl md:text-9xl transition-transform duration-300 drop-shadow-md';
+
+        document.getElementById('monster-bubble').innerText = `Yum yum! ${selectedChoice.name}! 😋`;
+        document.getElementById('monster-bubble').classList.remove('hidden');
+
+        // Speak complete sentence slowly
+        speakSlow(roundData.displaySentence, () => {
+          monsterAvatar.innerText = '👾';
+          monsterAvatar.className = 'monster-idle text-8xl md:text-9xl transition-transform duration-300 drop-shadow-md';
+          currentRound++;
+          if (currentRound > totalRounds) {
+            finishStage();
+          } else {
+            setupStage3Round();
+          }
+        });
+      } else {
+        // Wrong item
+        playWrongSFX();
+        btnEl.classList.add('shake-anim', 'bg-rose-100', 'border-rose-300');
+        speakSlow(`Find ${roundData.targetWord}!`);
+        setTimeout(() => {
+          btnEl.classList.remove('shake-anim', 'bg-rose-100', 'border-rose-300');
+        }, 800);
+      }
+    }
+
+    /* ================= GAME END & SCORE HANDLER ================= */
+    function finishStage() {
+      clearStage1Timers();
+      showScreen('screen-score');
+      playFanfareSFX();
+      triggerConfetti();
+
+      // Display final score
+      const scoreTextEl = document.getElementById('final-score-text');
+      if (currentStage === 1) {
+        scoreTextEl.innerText = `${stageScore} Points`;
+      } else {
+        scoreTextEl.innerText = `${stageScore} / ${totalRounds}`;
+      }
+
+      // Stars rating visual
+      const starsContainer = document.getElementById('stars-container');
+      if (stageScore >= 5 || (currentStage === 1 && stageScore >= 8)) {
+        starsContainer.innerText = '⭐ ⭐ ⭐';
+      } else if (stageScore >= 3) {
+        starsContainer.innerText = '⭐ ⭐ 🌟';
+      } else {
+        starsContainer.innerText = '⭐ 🌟 🌟';
+      }
+
+      // MANDATORY REQUIREMENT: Speak ONLY the score in slow English (No extra chatty text!)
+      const pointWord = stageScore === 1 ? 'point' : 'points';
+      speakSlow(`You got ${stageScore} ${pointWord}!`);
+    }
+
+    function triggerConfetti() {
+      const canvas = document.getElementById('confetti-canvas');
+      const ctx = canvas.getContext('2d');
+      canvas.width = window.innerWidth;
+      canvas.height = window.innerHeight;
+
+      const pieces = [];
+      const colors = ['#f1c40f', '#e67e22', '#e74c3c', '#9b59b6', '#3498db', '#2ecc71', '#fd79a8'];
+
+      for (let i = 0; i < 90; i++) {
+        pieces.push({
+          x: Math.random() * canvas.width,
+          y: Math.random() * canvas.height - canvas.height,
+          size: 9 + Math.random() * 8,
+          color: colors[Math.floor(Math.random() * colors.length)],
+          vy: 2.5 + Math.random() * 4,
+          vx: -2 + Math.random() * 4,
+          rotation: Math.random() * 360
+        });
+      }
+
+      let frame = 0;
+      function animateConfetti() {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        pieces.forEach(p => {
+          p.y += p.vy;
+          p.x += p.vx;
+          p.rotation += 4;
+
+          ctx.save();
+          ctx.translate(p.x, p.y);
+          ctx.rotate((p.rotation * Math.PI) / 180);
+          ctx.fillStyle = p.color;
+          ctx.fillRect(-p.size / 2, -p.size / 2, p.size, p.size);
+          ctx.restore();
+        });
+
+        frame++;
+        if (frame < 180) {
+          requestAnimationFrame(animateConfetti);
+        } else {
+          ctx.clearRect(0, 0, canvas.width, canvas.height);
+        }
+      }
+
+      animateConfetti();
+    }
+
+    window.addEventListener('resize', () => {
+      const canvas = document.getElementById('confetti-canvas');
+      if (canvas) {
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
+      }
+    });
+
+    window.onload = () => {
+      showMainMenu();
+    };
+  </script>
+</body>
+</html>
